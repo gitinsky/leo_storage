@@ -89,6 +89,8 @@ after_proc({ok, Pid}) ->
 
     ensure_started(rex, rpc, start_link, worker, 2000),
 
+    application:start(leo_rpc),
+
     ok = leo_storage_api:register_in_monitor(first),
     {ok, Pid};
 
