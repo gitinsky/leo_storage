@@ -88,6 +88,7 @@ after_proc({ok, Pid}) ->
     ok = leo_storage_statistics:start_link(?SNMP_SYNC_INTERVAL_L),
 
     ensure_started(rex, rpc, start_link, worker, 2000),
+    application:start(leo_rpc),
 
     ok = leo_storage_api:register_in_monitor(first),
     {ok, Pid};
