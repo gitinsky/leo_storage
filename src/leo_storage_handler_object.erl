@@ -552,6 +552,8 @@ read_and_repair(ReadParameter, [#redundant_node{node = Node,
     Reply  = case rpc:nb_yield(RPCKey, ?DEF_REQ_TIMEOUT) of
                  {value, {ok, Meta, Bin}} ->
                      {ok, Meta, #object{data = Bin}};
+                 {value, {ok, match} = Ret} ->
+                     Ret;
                  {value, {error, Cause}} ->
                      {error, Cause};
                  {value, {badrpc, Cause}} ->
@@ -568,6 +570,8 @@ read_and_repair(ReadParameter, [_|T]) ->
 
 
 %% @private
+read_and_repair_1({ok, match} = Reply, #read_parameter{}, []) ->
+    Reply;
 read_and_repair_1({ok, Metadata, #object{data = Bin}},
                   #read_parameter{}, []) ->
     {ok, Metadata, Bin};
