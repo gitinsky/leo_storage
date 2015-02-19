@@ -412,7 +412,7 @@ delete(Object, ReqId, CheckUnderDir) ->
 %% @private
 delete_1(Ret,_Object, false) ->
     Ret;
-delete_1(Ret, Object, true) ->
+delete_1(Ret,_Object, true) ->
     %% ok = delete_objects_under_dir(Object),
     Ret.
 
