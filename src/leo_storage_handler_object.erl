@@ -880,11 +880,14 @@ read_and_repair_2(#read_parameter{addr_id   = AddrId,
                 Metadata = binary_to_term(MetaBin),
                 case Metadata#?METADATA.checksum of
                     ETag ->
+                        statsd:leo_increment("read_n_repair.etag_matches"),
                         {ok, match};
                     _ ->
+                        statsd:leo_increment("read_n_repair.etag_does_not_match"),
                         []
                 end;
             _ ->
+                statsd:leo_increment("read_n_repair.head_not_ok"),
                 []
         end,
 
@@ -929,6 +932,7 @@ read_and_repair_3({ok, Metadata, #?OBJECT{data = Bin}},
     Fun = fun(ok) ->
                   {ok, Metadata, Bin};
              ({error,_Cause}) ->
+                  statsd:leo_increment("read_n_repair.err_recover_fail"),
                   {error, ?ERROR_RECOVER_FAILURE}
           end,
     ReadParameter_1 = ReadParameter#read_parameter{quorum = Quorum},
