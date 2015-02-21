@@ -71,6 +71,7 @@
              {ok, reference(), binary(), binary(), binary()} |
              {error, reference(), any()} when RefAndKey::{reference(), binary()}).
 get({Ref, Key}) ->
+    statsd:leo_increment("get.get1"),
     ok = leo_metrics_req:notify(?STAT_COUNT_GET),
     case leo_redundant_manager_api:get_redundancies_by_key(get, Key) of
         {ok, #redundancies{id = AddrId}} ->
@@ -92,10 +93,12 @@ get({Ref, Key}) ->
              {error, any()} when ReadParams::#read_parameter{},
                                  Redundancies::[#redundant_node{}]).
 get(ReadParameter, Redundancies) when Redundancies /= [] ->
+    statsd:leo_increment("get.get2"),
     ok = leo_metrics_req:notify(?STAT_COUNT_GET),
     read_and_repair(ReadParameter, Redundancies);
 
 get(#read_parameter{addr_id = AddrId} = ReadParameter,_Redundancies) ->
+    statsd:leo_increment("get.get2_1"),
     case leo_redundant_manager_api:get_redundancies_by_addr_id(get, AddrId) of
         {ok, #redundancies{nodes = Redundancies,
                            r = ReadQuorum}} ->
@@ -113,6 +116,7 @@ get(#read_parameter{addr_id = AddrId} = ReadParameter,_Redundancies) ->
                                  Key::binary(),
                                  ReqId::integer()).
 get(AddrId, Key, ReqId) ->
+    statsd:leo_increment("get.get3"),
     get(#read_parameter{ref = make_ref(),
                         addr_id   = AddrId,
                         key       = Key,
@@ -128,6 +132,7 @@ get(AddrId, Key, ReqId) ->
                                  ETag::integer(),
                                  ReqId::integer()).
 get(AddrId, Key, ETag, ReqId) ->
+    statsd:leo_increment("get.get4"),
     get(#read_parameter{ref = make_ref(),
                         addr_id   = AddrId,
                         key       = Key,
@@ -145,6 +150,7 @@ get(AddrId, Key, ETag, ReqId) ->
                                  EndPos::integer(),
                                  ReqId::integer()).
 get(AddrId, Key, StartPos, EndPos, ReqId) ->
+    statsd:leo_increment("get.get5"),
     get(#read_parameter{ref = make_ref(),
                         addr_id   = AddrId,
                         key       = Key,
