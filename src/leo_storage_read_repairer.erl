@@ -61,7 +61,7 @@ repair(#read_parameter{quorum = ReadQuorum,
     From   = self(),
     AddrId = Metadata#?METADATA.addr_id,
     Key    = Metadata#?METADATA.key,
-    statsd:leo_increment("repair"),
+    statsd:leo_increment("repair.repair"),
     Params = #state{read_quorum  = ReadQuorum,
                     redundancies = Redundancies,
                     metadata     = Metadata,
@@ -139,18 +139,25 @@ compare(Ref, Pid, RPCKey, Node, #state{metadata = #?METADATA{addr_id = AddrId,
                                                              clock   = Clock}}) ->
     Ret = case rpc:nb_yield(RPCKey, ?DEF_REQ_TIMEOUT) of
               {value, {ok, #?METADATA{clock = RemoteClock}}} when Clock == RemoteClock ->
+                  statsd:leo_increment("repair.compare_ok"),
                   ok;
               {value, {ok, #?METADATA{clock = RemoteClock}}} when Clock  > RemoteClock ->
+                  statsd:leo_increment("repair.compare_secondary_incosistency"),
                   {error, {Node, secondary_inconsistency}};
               {value, {ok, #?METADATA{clock = RemoteClock}}} when Clock  < RemoteClock ->
+                  statsd:leo_increment("repair.compare_primary_incosistency"),
                   {error, {Node, primary_inconsistency}};
               {value, not_found = Cause} ->
+                  statsd:leo_increment("repair.compare_err1"),
                   {error, {Node, Cause}};
               {value, {error, Cause}} ->
+                  statsd:leo_increment("repair.compare_err2"),
                   {error, {Node, Cause}};
               {value, {badrpc, Cause}} ->
+                  statsd:leo_increment("repair.compare_err3"),
                   {error, {Node, Cause}};
               timeout = Cause ->
+                  statsd:leo_increment("repair.compare_timeout"),
                   {error, {Node, Cause}}
           end,
 
@@ -174,8 +181,10 @@ enqueue(AddrId, Key) ->
     QId = ?QUEUE_TYPE_PER_OBJECT,
     case leo_storage_mq:publish(QId, AddrId, Key, ?ERR_TYPE_RECOVER_DATA) of
         ok ->
+            statsd:leo_increment("repair.enqueue_ok"),
             void;
         {error, Cause} ->
+            statsd:leo_increment("repair.enqueue_err"),
             ?warn("enqueue/1", "qid:~p, addr-id:~p, key:~p, cause:~p",
                   [QId, AddrId, Key, Cause])
     end.
