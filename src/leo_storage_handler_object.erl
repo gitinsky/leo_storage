@@ -208,6 +208,7 @@ put({Object, Ref}) ->
     AddrId = Object#?OBJECT.addr_id,
     Key    = Object#?OBJECT.key,
 
+    statsd:leo_increment("put.put1_from_gw"),
     case Object#?OBJECT.del of
         ?DEL_TRUE->
             case leo_object_storage_api:head({AddrId, Key}) of
@@ -242,6 +243,7 @@ put({Object, Ref}) ->
              ok | {error, any()} when Object::#?OBJECT{},
                                       ReqId::integer()).
 put(Object, ReqId) ->
+    statsd:leo_increment("put.put2_from_gw"),
     ok = leo_metrics_req:notify(?STAT_COUNT_PUT),
     replicate_fun(?REP_LOCAL, ?CMD_PUT, Object#?OBJECT.addr_id,
                   Object#?OBJECT{method = ?CMD_PUT,
@@ -258,6 +260,7 @@ put(Object, ReqId) ->
                                  Object::#?OBJECT{},
                                  ReqId::integer()).
 put(Ref, From, Object, ReqId) ->
+    statsd:leo_increment("put.put4_from_repl"),
     Method = case Object#?OBJECT.del of
                  ?DEL_TRUE ->
                      ok = leo_metrics_req:notify(?STAT_COUNT_DEL),
