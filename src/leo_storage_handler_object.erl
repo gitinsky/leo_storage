@@ -581,6 +581,7 @@ head_with_calc_md5(AddrId, Key, MD5Context) ->
              {ok, reference()} |
              {error, reference()|any()} when Object::#?OBJECT{}).
 replicate(Object) ->
+    statsd:leo_increment("replicate.replicate1"),
     %% Transform an object to a metadata
     Metadata = leo_object_storage_transformer:object_to_metadata(Object),
     Method = Object#?OBJECT.method,
@@ -621,6 +622,7 @@ replicate(Object) ->
                                  AddrId::integer(),
                                  Key::binary()).
 replicate(DestNodes, AddrId, Key) ->
+    statsd:leo_increment("replicate.local_to_remote"),
     case leo_object_storage_api:head({AddrId, Key}) of
         {ok, MetaBin} ->
             Ref = make_ref(),
@@ -911,6 +913,7 @@ read_and_repair_2(ReadParameter, #redundant_node{node = Node}, Redundancies) ->
     Ref = make_ref(),
     Key = ReadParameter#read_parameter.key,
 
+    statsd:leo_increment("read_n_repair.call_get1"),
     RPCKey = rpc:async_call(Node, ?MODULE, get, [{Ref, Key}]),
     RetRPC = case catch rpc:nb_yield(RPCKey, ?DEF_REQ_TIMEOUT) of
                  {'EXIT', Cause} ->
@@ -942,6 +945,7 @@ read_and_repair_3({ok, Metadata, #?OBJECT{data = Bin}},
                   {error, ?ERROR_RECOVER_FAILURE}
           end,
     ReadParameter_1 = ReadParameter#read_parameter{quorum = Quorum},
+    statsd:leo_increment("read_n_repair.leo_storage_read_repairer_repair"),
     leo_storage_read_repairer:repair(ReadParameter_1, Redundancies, Metadata, Fun);
 
 read_and_repair_3({error, not_found = Cause}, #read_parameter{key = _K}, _Redundancies) ->
