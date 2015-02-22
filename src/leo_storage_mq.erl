@@ -260,6 +260,7 @@ init() ->
 -spec(handle_call({consume, any() | queue_id() , any() | binary()}) ->
              ok | {error, any()}).
 handle_call({consume, ?QUEUE_ID_PER_OBJECT, MessageBin}) ->
+    statsd:leo_increment("consume.queue_id_per_object.handle_call"),
     case catch binary_to_term(MessageBin) of
         {'EXIT', Cause} ->
             ?error("handle_call/1 - QUEUE_ID_PER_OBJECT",
@@ -270,8 +271,10 @@ handle_call({consume, ?QUEUE_ID_PER_OBJECT, MessageBin}) ->
                                    type    = ErrorType} ->
             case correct_redundancies(Key) of
                 ok ->
+                    statsd:leo_increment("consume.queue_id_per_object.correct_redundancies.ok"),
                     ok;
                 {error, Cause} ->
+                    statsd:leo_increment("consume.queue_id_per_object.correct_redundancies.err"),
                     publish(?QUEUE_TYPE_PER_OBJECT, AddrId, Key, ErrorType),
                     {error, Cause}
             end;
@@ -423,7 +426,7 @@ recover_node_callback(Node) ->
                 {ok, #redundancies{nodes = Redundancies}} ->
                     RedundantNodes = [N || #redundant_node{node = N} <- Redundancies],
                     %% Let's sleep
-                    timer:sleep(250),
+                    timer:sleep(500),
                     ok = recover_node_callback_1(AddrId, K, Node, RedundantNodes),
                     Acc;
                 _Other ->
