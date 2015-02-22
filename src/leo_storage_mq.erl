@@ -423,7 +423,7 @@ recover_node_callback(Node) ->
                 {ok, #redundancies{nodes = Redundancies}} ->
                     RedundantNodes = [N || #redundant_node{node = N} <- Redundancies],
                     %% Let's sleep
-                    timer:sleep(1000),
+                    timer:sleep(250),
                     ok = recover_node_callback_1(AddrId, K, Node, RedundantNodes),
                     Acc;
                 _Other ->
