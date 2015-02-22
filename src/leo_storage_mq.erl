@@ -422,6 +422,8 @@ recover_node_callback(Node) ->
             case leo_redundant_manager_api:get_redundancies_by_addr_id(put, AddrId) of
                 {ok, #redundancies{nodes = Redundancies}} ->
                     RedundantNodes = [N || #redundant_node{node = N} <- Redundancies],
+                    %% Let's sleep
+                    timer:sleep(1000),
                     ok = recover_node_callback_1(AddrId, K, Node, RedundantNodes),
                     Acc;
                 _Other ->
@@ -437,6 +439,7 @@ recover_node_callback_1(AddrId, Key, Node, RedundantNodes) ->
         true ->
             case lists:member(erlang:node(), RedundantNodes) of
                 true ->
+                    statsd:leo_increment("recover_node_callback.publish_perobject"),
                     ?MODULE:publish(?QUEUE_TYPE_PER_OBJECT,
                                     AddrId, Key, ?ERR_TYPE_RECOVER_DATA);
                 false ->
