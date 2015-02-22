@@ -247,6 +247,7 @@ attach(SystemConf) ->
 -spec(synchronize(Node) ->
              ok | {error, any()} when Node::atom()).
 synchronize(Node) ->
+    statsd:leo_increment("synchronize.node"),
     leo_storage_mq:publish(?QUEUE_TYPE_RECOVERY_NODE, Node).
 
 -spec(synchronize(SyncTarget, SyncVal) ->
@@ -261,6 +262,7 @@ synchronize(InconsistentNodes, #?METADATA{addr_id = AddrId,
 synchronize(Key, ErrorType) ->
     {ok, #redundancies{vnode_id_to = VNodeId}} =
         leo_redundant_manager_api:get_redundancies_by_key(Key),
+    statsd:leo_increment("synchronize.per_object"),
     leo_storage_mq:publish(?QUEUE_TYPE_PER_OBJECT, VNodeId, Key, ErrorType).
 
 
