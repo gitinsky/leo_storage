@@ -283,6 +283,7 @@ handle_call({consume, ?QUEUE_ID_PER_OBJECT, MessageBin}) ->
     end;
 
 handle_call({consume, ?QUEUE_ID_SYNC_BY_VNODE_ID, MessageBin}) ->
+    statsd:leo_increment("consume.queue_id_sync_by_vnode_id.handle_call"),
     case catch binary_to_term(MessageBin) of
         {'EXIT', Cause} ->
             ?error("handle_call/1 - QUEUE_ID_SYNC_BY_VNODE_ID",
@@ -300,6 +301,7 @@ handle_call({consume, ?QUEUE_ID_SYNC_BY_VNODE_ID, MessageBin}) ->
     end;
 
 handle_call({consume, ?QUEUE_ID_REBALANCE, MessageBin}) ->
+    statsd:leo_increment("consume.queue_id_rebalance.handle_call"),
     case catch binary_to_term(MessageBin) of
         {'EXIT', Cause} ->
             ?error("handle_call/1 - QUEUE_ID_REBALANCE",
@@ -312,6 +314,7 @@ handle_call({consume, ?QUEUE_ID_REBALANCE, MessageBin}) ->
     end;
 
 handle_call({consume, ?QUEUE_ID_ASYNC_DELETION, MessageBin}) ->
+    statsd:leo_increment("consume.queue_id_async_deletion.handle_call"),
     case catch binary_to_term(MessageBin) of
         {'EXIT', Cause} ->
             ?error("handle_call/1 - QUEUE_ID_ASYNC_DELETION",
@@ -336,6 +339,7 @@ handle_call({consume, ?QUEUE_ID_ASYNC_DELETION, MessageBin}) ->
     end;
 
 handle_call({consume, ?QUEUE_ID_RECOVERY_NODE, MessageBin}) ->
+    statsd:leo_increment("consume.queue_id_recovery_node.handle_call"),
     case catch binary_to_term(MessageBin) of
         {'EXIT', Cause} ->
             ?error("handle_call/1 - QUEUE_ID_RECOVERY_NODE",
@@ -348,6 +352,7 @@ handle_call({consume, ?QUEUE_ID_RECOVERY_NODE, MessageBin}) ->
     end;
 
 handle_call({consume, ?QUEUE_ID_SYNC_OBJ_WITH_DC, MessageBin}) ->
+    statsd:leo_increment("consume.queue_id_sync_obj_with_dc.handle_call"),
     case catch binary_to_term(MessageBin) of
         {'EXIT', Cause} ->
             ?error("handle_call/1 - QUEUE_ID_SYNC_OBJ_WITH_DC",
@@ -360,6 +365,7 @@ handle_call({consume, ?QUEUE_ID_SYNC_OBJ_WITH_DC, MessageBin}) ->
     end;
 
 handle_call({consume, ?QUEUE_ID_COMP_META_WITH_DC, MessageBin}) ->
+    statsd:leo_increment("consume.queue_id_comp_meta_with_dc.handle_call"),
     case catch binary_to_term(MessageBin) of
         {'EXIT', Cause} ->
             ?error("handle_call/1 - QUEUE_ID_COMP_META_WITH_DC",
@@ -382,6 +388,7 @@ handle_call({consume, ?QUEUE_ID_COMP_META_WITH_DC, MessageBin}) ->
     end;
 
 handle_call({consume, ?QUEUE_ID_DEL_DIR, MessageBin}) ->
+    statsd:leo_increment("consume.queue_id_del_dir.handle_call"),
     case catch binary_to_term(MessageBin) of
         {'EXIT', Cause} ->
             ?error("handle_call/1 - QUEUE_ID_DEL_DIR",
