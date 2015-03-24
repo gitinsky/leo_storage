@@ -636,8 +636,10 @@ replicate(DestNodes, AddrId, Key) ->
                             Ret = leo_sync_local_cluster:stack(
                                     DestNodes, AddrId, Key, Metadata, Bin),
                             Object_1 = leo_object_storage_transformer:metadata_to_object(Metadata),
+                            statsd:leo_increment("replicate.bug343.test1"),
                             Object_2 = Object_1#?OBJECT{method = ?CMD_PUT,
                                                         data = Bin},
+                            statsd:leo_increment("replicate.bug343.test2"),
                             ok = leo_sync_remote_cluster:defer_stack(Object_2),
                             Ret;
                         {error, Ref, Cause} ->
@@ -645,12 +647,15 @@ replicate(DestNodes, AddrId, Key) ->
                     end;
                 #?METADATA{del = ?DEL_TRUE} = Metadata ->
                     EmptyBin = <<>>,
+                    statsd:leo_increment("replicate.bug343.test3"),
                     Ret = leo_sync_local_cluster:stack(DestNodes, AddrId, Key, Metadata, EmptyBin),
                     Object_1 = leo_object_storage_transformer:metadata_to_object(Metadata),
+                    statsd:leo_increment("replicate.bug343.test4"),
                     Object_2 = Object_1#?OBJECT{method = ?CMD_DELETE,
                                                 data = EmptyBin,
                                                 dsize = 0,
                                                 del = ?DEL_TRUE},
+                    statsd:leo_increment("replicate.bug343.test5"),
                     ok = leo_sync_remote_cluster:defer_stack(Object_2),
                     Ret;
                 _ ->
