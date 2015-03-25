@@ -258,7 +258,9 @@ synchronize(Node) ->
 synchronize(InconsistentNodes, #?METADATA{addr_id = AddrId,
                                           key     = Key}) ->
     statsd:leo_increment("synchronize.call_storage_handler_replicate"),
-    leo_storage_handler_object:replicate(InconsistentNodes, AddrId, Key);
+    Ret = leo_storage_handler_object:replicate(InconsistentNodes, AddrId, Key),
+    statsd:leo_increment("synchronize.call_storage_handler_replicate_end"),
+    Ret;
 
 synchronize(Key, ErrorType) ->
     {ok, #redundancies{vnode_id_to = VNodeId}} =
