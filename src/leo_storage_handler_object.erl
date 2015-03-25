@@ -636,6 +636,7 @@ replicate(DestNodes, AddrId, Key) ->
     statsd:leo_increment("replicate.local_to_remote"),
     case leo_object_storage_api:head({AddrId, Key}) of
         {ok, MetaBin} ->
+            statsd:leo_increment("replicate.ok_metabin"),
             Ref = make_ref(),
             case binary_to_term(MetaBin) of
                 #?METADATA{del = ?DEL_FALSE} = Metadata ->
@@ -651,6 +652,7 @@ replicate(DestNodes, AddrId, Key) ->
                             ok = leo_sync_remote_cluster:defer_stack(Object_2),
                             Ret;
                         {error, Ref, Cause} ->
+                            statsd:leo_increment("replicate.modget_error"),
                             {error, Cause}
                     end;
                 #?METADATA{del = ?DEL_TRUE} = Metadata ->
@@ -667,9 +669,11 @@ replicate(DestNodes, AddrId, Key) ->
                     ok = leo_sync_remote_cluster:defer_stack(Object_2),
                     Ret;
                 _ ->
+                    statsd:leo_increment("replicate.invalid_type_err"),
                     {error, invalid_data_type}
             end;
         Error ->
+            statsd:leo_increment("replicate.encl_error"),
             Error
     end.
 
