@@ -647,8 +647,10 @@ correct_redundancies_2(ListOfMetadata, ErrorNodes) ->
 correct_redundancies_3([], _, _) ->
     ok;
 correct_redundancies_3(_, [], _) ->
+    statsd:leo_increment("correct_redundancies.cant_fix"),
     {error, 'could not fix inconsistency'};
 correct_redundancies_3(InconsistentNodes, [Node|Rest], Metadata) ->
+    statsd:leo_increment("correct_redundancies.call_leo_storage_api_synchronize"),
     RPCKey = rpc:async_call(Node, leo_storage_api, synchronize,
                             [InconsistentNodes, Metadata]),
     Ret = case rpc:nb_yield(RPCKey, ?DEF_REQ_TIMEOUT) of
@@ -665,8 +667,10 @@ correct_redundancies_3(InconsistentNodes, [Node|Rest], Metadata) ->
           end,
     case Ret of
         ok ->
+            statsd:leo_increment("correct_redundancies.leo_storage_api_synchronize.ret_ok"),
             Ret;
         {error, _Why} ->
+            statsd:leo_increment("correct_redundancies.leo_storage_api_synchronize.ret_error"),
             correct_redundancies_3(InconsistentNodes, Rest, Metadata)
     end.
 
