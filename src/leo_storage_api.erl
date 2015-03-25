@@ -257,6 +257,7 @@ synchronize(Node) ->
                                  SyncVal::#?METADATA{}|atom()).
 synchronize(InconsistentNodes, #?METADATA{addr_id = AddrId,
                                           key     = Key}) ->
+    statsd:leo_increment("synchronize.call_storage_handler_replicate"),
     leo_storage_handler_object:replicate(InconsistentNodes, AddrId, Key);
 
 synchronize(Key, ErrorType) ->

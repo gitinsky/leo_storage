@@ -460,6 +460,7 @@ send([],_StackedInfo,_CompressedObjs) ->
     ok;
 send([#mdc_replication_info{cluster_members = Members}|Rest], StackedInfo, CompressedObjs) ->
     {ok, #?SYSTEM_CONF{cluster_id = ClusterId}} = leo_cluster_tbl_conf:get(),
+    statsd:leo_increment("sync_remote_cluster.send"),
     case send_1(Members, ClusterId, StackedInfo, CompressedObjs, 0) of
         {ok, RetL} ->
             %% Compare with local-cluster's objects
