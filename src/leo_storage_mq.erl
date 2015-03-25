@@ -655,14 +655,19 @@ correct_redundancies_3(InconsistentNodes, [Node|Rest], Metadata) ->
                             [InconsistentNodes, Metadata]),
     Ret = case rpc:nb_yield(RPCKey, ?DEF_REQ_TIMEOUT) of
               {value, ok} ->
+                  statsd:leo_increment("correct_redundancies.leo_storage_api_synchronize.ok"),
                   ok;
               {value, {error, Cause}} ->
+                  statsd:leo_increment("correct_redundancies.leo_storage_api_synchronize.other_error"),
                   {error, Cause};
               {value, not_found = Cause} ->
+                  statsd:leo_increment("correct_redundancies.leo_storage_api_synchronize.not_found"),
                   {error, Cause};
               {value, {badrpc = Cause, _}} ->
+                  statsd:leo_increment("correct_redundancies.leo_storage_api_synchronize.badrpc"),
                   {error, Cause};
               timeout = Cause->
+                  statsd:leo_increment("correct_redundancies.leo_storage_api_synchronize.timeout"),
                   {error, Cause}
           end,
     case Ret of
