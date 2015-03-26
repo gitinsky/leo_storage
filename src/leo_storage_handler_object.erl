@@ -182,16 +182,21 @@ get_fun(AddrId, Key, StartPos, EndPos) ->
             case leo_object_storage_api:get(
                    {AddrId, Key}, StartPos, EndPos) of
                 {ok, Metadata, Object} ->
+                    statsd:leo_increment("handlerobj.get_fun.ok"),
                     {ok, Metadata, Object};
                 not_found = Cause ->
+                    statsd:leo_increment("handlerobj.get_fun.not_found"),
                     {error, Cause};
                 {error, ?ERROR_LOCKED_CONTAINER} ->
+                    statsd:leo_increment("handlerobj.get_fun.locked_container"),
                     {error, unavailable};
                 {error, Cause} ->
+                    statsd:leo_increment("handlerobj.get_fun.error"),
                     {error, Cause}
             end;
         {ok, ErrorItems} ->
             ?debug("get_fun/4", "error-items:~p", [ErrorItems]),
+            statsd:leo_increment("handlerobj.get_fun.erritems_unavail"),
             {error, unavailable}
     end.
 
