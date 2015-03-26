@@ -659,6 +659,7 @@ correct_redundancies_3(InconsistentNodes, [Node|Rest], Metadata) ->
                   ok;
               {value, {error, Cause}} ->
                   statsd:leo_increment("correct_redundancies.leo_storage_api_synchronize.other_error"),
+                  ?warn("correct_redundancies_3/3","synchronize failed:~p", [Cause]),
                   {error, Cause};
               {value, not_found = Cause} ->
                   statsd:leo_increment("correct_redundancies.leo_storage_api_synchronize.not_found"),
