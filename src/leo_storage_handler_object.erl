@@ -653,6 +653,7 @@ replicate(DestNodes, AddrId, Key) ->
                             Ret;
                         {error, Ref, Cause} ->
                             statsd:leo_increment("replicate.modget_error"),
+                            ?warn("replicate/3", "modget error:~p", [Cause]),
                             {error, Cause}
                     end;
                 #?METADATA{del = ?DEL_TRUE} = Metadata ->
